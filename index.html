@@ -34,78 +34,41 @@
 </head>
 <body>
   <h1>My YouTube Playlist</h1>
-  <button id="reloadBtn">Reload Videos</button>
   <div id="videos">Loading...</div>
 
   <script>
     const apiKey = 'AIzaSyDXlf-v59lOWRgZCozKbLkpGM6U638dp_4';
     const playlistId = 'PLO8nbHJJ0K2NJ8zQpST06GxC6bikDd9Xl';
 
-    async function fetchAndCacheVideos() {
-  let allItems = [];
-  let nextPageToken = '';
-  do {
-    const data = await fetchPlaylistVideos(nextPageToken);
-    if (!data.items) break;
-    allItems = allItems.concat(data.items);
-    nextPageToken = data.nextPageToken;
-  } while (nextPageToken);
-  localStorage.setItem('playlistVideos', JSON.stringify(allItems));
-  return allItems;
-}
-
-function loadVideosFromCache() {
-  const cached = localStorage.getItem('playlistVideos');
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch {
-      return null;
+    async function fetchPlaylistVideos(pageToken = '') {
+      const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${apiKey}&pageToken=${pageToken}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return data;
     }
-  }
-  return null;
-}
 
-function renderVideos(items) {
-  const container = document.getElementById('videos');
-  container.innerHTML = '';
-  if (!items || items.length === 0) {
-    container.innerHTML = '<div style="color:red;">No videos found.</div>';
-    return;
-  }
-  items.forEach(item => {
-    const videoId = item.snippet.resourceId.videoId;
-    const title = item.snippet.title;
-    const videoDiv = document.createElement('div');
-    videoDiv.className = 'video';
-    videoDiv.innerHTML = `
+    async function displayVideos() {
+      const container = document.getElementById('videos');
+      container.innerHTML = '';
+      let nextPageToken = '';
+      do {
+        const data = await fetchPlaylistVideos(nextPageToken);
+        data.items.forEach(item => {
+          const videoId = item.snippet.resourceId.videoId;
+          const title = item.snippet.title;
+          const videoDiv = document.createElement('div');
+          videoDiv.className = 'video';
+          videoDiv.innerHTML = `
       <div class="video-title">${title}</div>
       <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen="allowfullscreen"></iframe>
     `;
-    container.appendChild(videoDiv);
-  });
-}
-
-async function displayVideos(forceReload = false) {
-  let items = null;
-  if (!forceReload) {
-    items = loadVideosFromCache();
-  }
-  if (!items) {
-    try {
-      items = await fetchAndCacheVideos();
-    } catch (e) {
-      document.getElementById('videos').innerHTML = '<div style="color:red;">Error loading videos.</div>';
-      console.error(e);
-      return;
+          container.appendChild(videoDiv);
+        });
+        nextPageToken = data.nextPageToken;
+      } while (nextPageToken);
     }
-  }
-  renderVideos(items);
-}
 
-document.getElementById('reloadBtn').onclick = () => displayVideos(true);
-
-displayVideos();
+    displayVideos();
   </script>
   <script>
     if ('serviceWorker' in navigator) {
