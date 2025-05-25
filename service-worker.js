@@ -1,10 +1,10 @@
 const CACHE_NAME = 'playlist-data-cache-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
+  '/PlaylistData/',
+  '/PlaylistData/index.html',
+  '/PlaylistData/manifest.json',
+  '/PlaylistData/icon-192.png',
+  '/PlaylistData/icon-512.png'
 ];
 
 // Install event: cache files

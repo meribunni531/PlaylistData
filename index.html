@@ -51,22 +51,31 @@
       const container = document.getElementById('videos');
       container.innerHTML = '';
       let nextPageToken = '';
-      do {
-        const data = await fetchPlaylistVideos(nextPageToken);
-        data.items.forEach(item => {
-          const videoId = item.snippet.resourceId.videoId;
-          const title = item.snippet.title;
-          const videoDiv = document.createElement('div');
-          videoDiv.className = 'video';
-          videoDiv.innerHTML = `
-            <div class="video-title">${title}</div>
-            <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
-          `;
-          container.appendChild(videoDiv);
-        });
-        nextPageToken = data.nextPageToken;
-      } while (nextPageToken);
-    }
+      try {
+        do {
+      const data = await fetchPlaylistVideos(nextPageToken);
+      if (!data.items) {
+        container.innerHTML = '<div style="color:red;">Failed to load videos. Check API key or quota.</div>';
+        break;
+      }
+      data.items.forEach(item => {
+        const videoId = item.snippet.resourceId.videoId;
+        const title = item.snippet.title;
+        const videoDiv = document.createElement('div');
+        videoDiv.className = 'video';
+        videoDiv.innerHTML = `
+          <div class="video-title">${title}</div>
+          <iframe src="https://www.youtube.com/embed/${videoId}" allowfullscreen></iframe>
+        `;
+        container.appendChild(videoDiv);
+      });
+      nextPageToken = data.nextPageToken;
+    } while (nextPageToken);
+  } catch (e) {
+    container.innerHTML = '<div style="color:red;">Error loading videos.</div>';
+    console.error(e);
+  }
+}
 
     displayVideos();
   </script>
