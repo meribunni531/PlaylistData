@@ -38,46 +38,45 @@
   <div id="videos">Loading...</div>
 
   <script>
-    const apiKey = 'AIzaSyDXlf-v59lOWRgZCozKbLkpGM6U638dp_4';
-    const playlistId = 'PLO8nbHJJ0K2NJ8zQpST06GxC6bikDd9Xl';
+  const apiKey = 'AIzaSyDXlf-v59lOWRgZCozKbLkpGM6U638dp_4';
+  const playlistId = 'PLO8nbHJJ0K2NJ8zQpST06GxC6bikDd9Xl';
 
-    async function fetchPlaylistVideos(pageToken = '') {
-      const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${apiKey}&pageToken=${pageToken}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      return data;
-    }
+  async function fetchPlaylistVideos(pageToken = '') {
+    const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=10&playlistId=${playlistId}&key=${apiKey}&pageToken=${pageToken}`;
+    const res = await fetch(url);
+    return res.json();
+  }
 
-    async function displayVideos() {
-      const container = document.getElementById('videos');
-      container.innerHTML = '';
-      let nextPageToken = '';
-      do {
-        const data = await fetchPlaylistVideos(nextPageToken);
-        data.items.forEach(item => {
-          const videoId = item.snippet.resourceId.videoId;
-          const title = item.snippet.title;
-          const videoDiv = document.createElement('div');
-          videoDiv.className = 'video';
-          videoDiv.innerHTML = `
-      <div class="video-title">${title}</div>
-      <p><iframe width="640" height="360"
-  src="https://www.youtube-nocookie.com/embed/fPy4oRoeZpM?si=KP8j_7VZ_nw-3lTu"
-  data-src="https://www.youtube-nocookie.com/embed/fPy4oRoeZpM?si=KP8j_7VZ_nw-3lTu"
-  title="YouTube video player"
-  frameborder="0"
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-  referrerpolicy="strict-origin-when-cross-origin"
-  allowfullscreen>
-</iframe></p>
-      `;
-          container.appendChild(videoDiv);
-        });
-        nextPageToken = data.nextPageToken;
-      } while (nextPageToken);
-    }
+  async function displayVideos() {
+    const container = document.getElementById('videos');
+    container.innerHTML = '';
+    let nextPageToken = '';
+    do {
+      const data = await fetchPlaylistVideos(nextPageToken);
+      data.items.forEach(item => {
+        const videoId = item.snippet.resourceId.videoId;
+        const title = item.snippet.title;
+        const videoDiv = document.createElement('div');
+        videoDiv.className = 'video';
+        videoDiv.innerHTML = `
+          <div class="video-title">${title}</div>
+          <iframe
+            src="https://www.youtube-nocookie.com/embed/${videoId}"
+            title="${title}"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen>
+          </iframe>
+        `;
+        container.appendChild(videoDiv);
+      });
+      nextPageToken = data.nextPageToken;
+    } while (nextPageToken);
+  }
 
-    displayVideos();
-  </script>
+  displayVideos();
+</script>
+
 </body>
 </html>
